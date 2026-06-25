@@ -640,66 +640,29 @@ function bekreftSend(){
   document.getElementById('statusSelect').value='Sendt';
   renderSidebar();
 
-  // Bygg HTML-faktura for e-post
   const subtotal=f.linjer.reduce((s,l)=>s+parseFloat(l.a||0)*parseFloat(l.p||0),0);
   const mva=f.mvaOn?subtotal*.25:0;
   const total=subtotal+mva;
 
-  const linjerRader=f.linjer.filter(l=>l.b||l.p).map((l,i)=>`
-    <tr style="background:${i%2===0?'#f8fafc':'#ffffff'}">
-      <td style="padding:10px 14px;font-size:14px;color:#1e2838">${l.b||'—'}</td>
-      <td style="padding:10px 14px;font-size:14px;color:#1e2838;text-align:right">${l.a||''}</td>
-      <td style="padding:10px 14px;font-size:14px;color:#1e2838;text-align:right">${pdfKr(parseFloat(l.p||0))}</td>
-      <td style="padding:10px 14px;font-size:14px;font-weight:600;color:#0f1117;text-align:right">${pdfKr(parseFloat(l.a||0)*parseFloat(l.p||0))}</td>
-    </tr>`).join('');
-
-  const faktura_html=`
-  <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#ffffff">
-    <div style="background:#0f1117;padding:28px 32px;border-radius:8px 8px 0 0">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div style="font-size:18px;font-weight:700;color:#ffffff">${FIRMA.navn}</div>
-          <div style="font-size:12px;color:#94a3b8;margin-top:4px">Org.nr: ${FIRMA.orgnr}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:28px;font-weight:700;color:#3b82f6">FAKTURA</div>
-          <div style="font-size:13px;color:#94a3b8">Nr. ${f.fnr}</div>
-        </div>
-      </div>
-    </div>
-    <div style="background:#1e2330;padding:16px 32px;display:flex;gap:40px">
-      <div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#64748b">Fakturadato</div><div style="font-size:14px;font-weight:600;color:#f1f5f9;margin-top:3px">${fmt(f.fdato)}</div></div>
-      <div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#64748b">Forfallsdato</div><div style="font-size:14px;font-weight:600;color:#f1f5f9;margin-top:3px">${fmt(f.fforfall)}</div></div>
-      <div><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#64748b">Kontonummer</div><div style="font-size:14px;font-weight:600;color:#f1f5f9;margin-top:3px">${FIRMA.konto}</div></div>
-    </div>
-    <div style="padding:24px 32px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#64748b;margin-bottom:6px">Faktureres til</div>
-      <div style="font-size:15px;font-weight:600;color:#0f1117">${f.kNavn}</div>
-      ${f.kAdr?`<div style="font-size:13px;color:#64748b">${f.kAdr}</div>`:''}
-      ${f.kPost?`<div style="font-size:13px;color:#64748b">${f.kPost}</div>`:''}
-    </div>
-    ${f.arsak?`<div style="padding:16px 32px;background:#eff6ff;border-left:3px solid #3b82f6;border-bottom:1px solid #e2e8f0"><div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#3b82f6;margin-bottom:4px">Gjelder</div><div style="font-size:14px;color:#1e2838">${f.arsak}</div></div>`:''}
-    <div style="padding:0 32px 24px">
-      <table style="width:100%;border-collapse:collapse;margin-top:24px">
-        <thead><tr style="background:#0f1117"><th style="padding:10px 14px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#ffffff;text-align:left">Beskrivelse</th><th style="padding:10px 14px;font-size:11px;color:#ffffff;text-align:right">Antall</th><th style="padding:10px 14px;font-size:11px;color:#ffffff;text-align:right">Pris/enhet</th><th style="padding:10px 14px;font-size:11px;color:#ffffff;text-align:right">Beløp</th></tr></thead>
-        <tbody>${linjerRader}</tbody>
-      </table>
-      <div style="margin-top:16px;border-top:1px solid #e2e8f0;padding-top:16px">
-        <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#64748b"><span>Subtotal</span><span>${pdfKr(subtotal)}</span></div>
-        ${f.mvaOn?`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:#64748b"><span>MVA (25%)</span><span>${pdfKr(mva)}</span></div>`:''}
-        <div style="display:flex;justify-content:space-between;padding:12px 16px;background:#0f1117;border-radius:8px;margin-top:8px"><span style="font-size:15px;font-weight:600;color:#ffffff">Totalt å betale</span><span style="font-size:18px;font-weight:700;color:#06b6d4">${pdfKr(total)}</span></div>
-      </div>
-      ${f.notat?`<div style="margin-top:16px;padding:12px 16px;background:#f8fafc;border-radius:8px;font-size:13px;color:#64748b">${f.notat}</div>`:''}
-    </div>
-    <div style="background:#0f1117;padding:16px 32px;border-radius:0 0 8px 8px;text-align:center">
-      <div style="font-size:12px;color:#64748b">${FIRMA.navn} · Org.nr: ${FIRMA.orgnr} · Konto: ${FIRMA.konto}</div>
-    </div>
-  </div>`;
+  const linjerTekst=f.linjer.filter(l=>l.b||l.p).map(l=>
+    `${l.b||'—'}   x${l.a||0}   ${pdfKr(parseFloat(l.p||0))}   = ${pdfKr(parseFloat(l.a||0)*parseFloat(l.p||0))}`
+  ).join('\n');
 
   emailjs.send('service_of6o4ht','template_mgjy2m1',{
     til_epost: epost,
     fakturanr: f.fnr,
-    faktura_html: faktura_html
+    fakturadato: fmt(f.fdato),
+    forfallsdato: fmt(f.fforfall),
+    kunde_navn: f.kNavn||'',
+    kunde_adresse: [f.kAdr,f.kPost].filter(Boolean).join(', '),
+    arsak: f.arsak||'',
+    linjer_tekst: linjerTekst,
+    subtotal: pdfKr(subtotal),
+    mva: f.mvaOn?pdfKr(mva):'0,00 kr',
+    total: pdfKr(total),
+    kontonr: FIRMA.konto,
+    firma_navn: FIRMA.navn,
+    orgnr: FIRMA.orgnr
   },'UuijYQYjzoSTP1GsU')
   .then(()=>{
     lukkModal();
@@ -709,7 +672,7 @@ function bekreftSend(){
   })
   .catch(err=>{
     console.error(err);
-    showToast('❌ Sending feilet: '+JSON.stringify(err),'error');
+    showToast('❌ Sending feilet','error');
     btnSend.textContent='📤 Send nå';
     btnSend.disabled=false;
   });
