@@ -5,189 +5,341 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#0f1117">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Faktura">
 <title>Faktura — Steven M Jones</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2330;--border:#2a2f3d;--accent:#3b82f6;--accent2:#06b6d4;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--radius:12px;--radius-sm:8px}
+:root{--bg:#0f1117;--surface:#181c27;--surface2:#1e2330;--border:#2a2f3d;--accent:#3b82f6;--accent2:#06b6d4;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--radius:12px;--sidebar:280px}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
-.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;position:sticky;top:0;z-index:100}
-.header-inner{max-width:600px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
-.logo-text{font-size:15px;font-weight:600}
-.fakturanr-badge{font-size:12px;font-weight:600;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.greeting-bar{background:linear-gradient(135deg,#1a2035 0%,#0f1117 100%);border-bottom:1px solid var(--border);padding:18px 20px}
-.greeting-inner{max-width:600px;margin:0 auto}
-.greeting-time{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);margin-bottom:4px}
-.greeting-name{font-size:22px;font-weight:700}
-.greeting-name span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.greeting-sub{font-size:13px;color:var(--text3);margin-top:3px}
-.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px}
-.tabs-inner{max-width:600px;margin:0 auto;display:flex}
-.tab{padding:14px 18px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;user-select:none}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.tab:hover:not(.active){color:var(--text2)}
-.main{max-width:600px;margin:0 auto;padding:24px 20px 60px}
-.section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px;margin-top:24px}
-.section-label:first-child{margin-top:0}
+body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 20px;gap:16px;position:sticky;top:0;z-index:200;flex-shrink:0}
+.topbar-logo{display:flex;align-items:center;gap:9px;min-width:var(--sidebar);padding-right:16px;border-right:1px solid var(--border)}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.logo-text{font-size:14px;font-weight:600}
+.topbar-greeting{flex:1;display:flex;align-items:center;gap:12px}
+.greeting-pill{background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 14px;font-size:12px;font-weight:500;color:var(--text2)}
+.greeting-pill span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-weight:600}
+.topbar-nr{font-size:12px;font-weight:600;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-left:auto}
+
+/* ── LAYOUT ── */
+.app{display:flex;flex:1;overflow:hidden;height:calc(100vh - 56px)}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.sidebar-head{padding:16px}
+.btn-new{width:100%;padding:10px 14px;background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .2s;box-shadow:0 2px 12px rgba(59,130,246,.3)}
+.btn-new:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(59,130,246,.4)}
+.search-wrap{position:relative;margin-top:10px}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none}
+.search-input{width:100%;padding:8px 10px 8px 32px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text3)}
+.filter-tabs{display:flex;padding:0 16px;gap:4px;margin-bottom:8px}
+.filter-tab{flex:1;padding:6px 0;font-size:11px;font-weight:600;text-align:center;cursor:pointer;border-radius:7px;color:var(--text3);transition:all .2s;user-select:none;border:1px solid transparent}
+.filter-tab.active{background:var(--surface2);border-color:var(--border);color:var(--text)}
+.sidebar-list{flex:1;overflow-y:auto;padding:0 10px 16px}
+.sidebar-list::-webkit-scrollbar{width:4px}
+.sidebar-list::-webkit-scrollbar-track{background:transparent}
+.sidebar-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.sitem{padding:12px;border-radius:9px;cursor:pointer;margin-bottom:4px;border:1px solid transparent;transition:all .2s}
+.sitem:hover{background:var(--surface2);border-color:var(--border)}
+.sitem.active{background:#1a2035;border-color:var(--accent)}
+.sitem-top{display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:4px}
+.sitem-name{font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sitem-amt{font-size:12px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;flex-shrink:0}
+.sitem-bot{display:flex;align-items:center;gap:6px}
+.sitem-nr{font-size:11px;color:var(--text3)}
+.sitem-date{font-size:11px;color:var(--text3)}
+.badge{font-size:10px;font-weight:600;padding:1px 7px;border-radius:20px;flex-shrink:0}
+.b-sendt{background:#1a2d1a;color:var(--success)}
+.b-ikke-sendt{background:#1c1f12;color:#a3e635}
+.b-kladd{background:#2a2815;color:var(--warning)}
+.b-opprettet{background:#1a1f2d;color:var(--accent)}
+.sidebar-empty{text-align:center;padding:32px 16px;color:var(--text3);font-size:12px}
+
+/* ── MAIN CONTENT ── */
+.content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.content::-webkit-scrollbar{width:6px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── DASHBOARD ── */
+.dashboard{padding:28px 32px}
+.dash-title{font-size:20px;font-weight:700;margin-bottom:20px}
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px}
+.stat-value{font-size:22px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.table-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-head-title{font-size:13px;font-weight:600}
+.ftable{width:100%;border-collapse:collapse}
+.ftable th{padding:10px 16px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);text-align:left;background:var(--surface2);border-bottom:1px solid var(--border)}
+.ftable td{padding:13px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text2)}
+.ftable tr:last-child td{border-bottom:none}
+.ftable tr:hover td{background:#1a2035;cursor:pointer}
+.ftable .td-name{font-weight:600;color:var(--text)}
+.ftable .td-amt{font-weight:700;color:var(--text)}
+.dash-empty{text-align:center;padding:48px;color:var(--text3)}
+.dash-empty-icon{font-size:36px;margin-bottom:10px}
+.dash-empty-title{font-size:14px;font-weight:500;color:var(--text2);margin-bottom:5px}
+
+/* ── EDITOR ── */
+.editor{padding:28px 32px;max-width:720px}
+.editor-toprow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.btn-back{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s}
+.btn-back:hover{color:var(--text);border-color:var(--text3)}
+.editor-title{font-size:18px;font-weight:700;flex:1}
+.status-select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--text);font-family:inherit;cursor:pointer;outline:none}
+.section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:8px;margin-top:20px}
+.section-label:first-of-type{margin-top:0}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.form-row{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:12px}
+.form-row{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);gap:12px}
 .form-row:last-child{border-bottom:none}
 .form-label{font-size:13px;font-weight:500;color:var(--text2);min-width:110px;flex-shrink:0}
-input,select,textarea{background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:14px;font-weight:500;flex:1;text-align:right;min-width:0}
+input[type="text"],input[type="date"],input[type="email"],input[type="number"],select,textarea{background:transparent;border:none;outline:none;color:var(--text);font-family:inherit;font-size:13px;font-weight:500;flex:1;text-align:right;min-width:0;width:100%}
 input::placeholder,textarea::placeholder{color:var(--text3);font-weight:400}
-select{cursor:pointer}
+textarea{resize:none;text-align:left;line-height:1.5}
 select option{background:var(--surface2)}
-textarea{resize:none;text-align:left}
-.lines-header{display:grid;grid-template-columns:1fr 70px 85px 85px 32px;gap:6px;padding:10px 14px;background:var(--surface2);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none}
+.reason-box{padding:12px 16px}
+.reason-box textarea{font-size:13px;color:var(--text);line-height:1.6;min-height:70px}
+.lines-header{display:grid;grid-template-columns:1fr 65px 85px 85px 30px;gap:6px;padding:9px 14px;background:var(--surface2);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none}
 .lines-header span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
-.line-item{display:grid;grid-template-columns:1fr 70px 85px 85px 32px;gap:6px;padding:10px 14px;border:1px solid var(--border);border-top:none;background:var(--surface);align-items:center}
+.line-item{display:grid;grid-template-columns:1fr 65px 85px 85px 30px;gap:6px;padding:9px 14px;border:1px solid var(--border);border-top:none;background:var(--surface);align-items:center}
 .line-item:last-child{border-radius:0 0 var(--radius) var(--radius)}
-.line-item input{text-align:left;font-size:13px;padding:6px 8px;background:var(--bg);border:1px solid var(--border);border-radius:6px;width:100%}
+.line-item input{text-align:left;font-size:13px;padding:5px 8px;background:var(--bg);border:1px solid var(--border);border-radius:6px}
 .line-item input:focus{border-color:var(--accent);background:#1a2035}
 .line-item input[type="number"]{text-align:right}
-.line-total{font-size:13px;font-weight:600;text-align:right}
+.line-total{font-size:13px;font-weight:600;text-align:right;color:var(--text)}
 .line-delete{width:26px;height:26px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;margin:0 auto}
 .line-delete:hover{background:#2d1515;color:var(--danger)}
-.add-line-btn{width:100%;padding:12px;background:var(--surface2);border:1px dashed var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);color:var(--text3);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-line-btn{width:100%;padding:11px;background:var(--surface2);border:1px dashed var(--border);border-top:none;border-radius:0 0 var(--radius) var(--radius);color:var(--text3);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px}
 .add-line-btn:hover{color:var(--accent);border-color:var(--accent);background:#1a2035}
 .summary{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-.summary-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:11px 16px;border-bottom:1px solid var(--border)}
 .summary-row:last-child{border-bottom:none}
-.summary-row.total{background:linear-gradient(135deg,#1a2035,#162030);padding:16px}
+.summary-row.total{background:linear-gradient(135deg,#1a2035,#162030);padding:14px 16px}
 .summary-label{font-size:13px;color:var(--text2)}
-.summary-value{font-size:14px;font-weight:600}
+.summary-value{font-size:13px;font-weight:600;color:var(--text)}
 .summary-row.total .summary-label{font-size:14px;font-weight:600;color:var(--text)}
 .summary-row.total .summary-value{font-size:20px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
 .toggle-label{font-size:13px;font-weight:500;color:var(--text2)}
 .toggle-sub{font-size:11px;color:var(--text3);margin-top:2px}
-.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
+.toggle{width:42px;height:22px;background:var(--border);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;border:none}
 .toggle.on{background:var(--accent)}
-.toggle::after{content:'';position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s}
 .toggle.on::after{left:23px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 20px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s;width:100%}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;box-shadow:0 4px 20px rgba(59,130,246,.3)}
-.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(59,130,246,.4)}
+.action-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 18px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;width:100%;font-family:inherit}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#2563eb);color:#fff;box-shadow:0 3px 14px rgba(59,130,246,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 20px rgba(59,130,246,.4)}
 .btn-secondary{background:var(--surface2);color:var(--text2);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--surface);color:var(--text)}
-.btn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-.invoice-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:10px;cursor:pointer;transition:all .2s}
-.invoice-item:hover{border-color:var(--accent);background:#1a2035}
-.invoice-item-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
-.invoice-customer{font-size:15px;font-weight:600}
-.invoice-amount{font-size:15px;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.invoice-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.invoice-date,.invoice-nr{font-size:12px;color:var(--text3)}
-.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
-.badge-sent{background:#1a2d1a;color:var(--success)}
-.badge-draft{background:#2a2815;color:var(--warning)}
-.empty-state{text-align:center;padding:48px 20px;color:var(--text3)}
-.empty-icon{font-size:40px;margin-bottom:12px}
-.empty-title{font-size:15px;font-weight:500;color:var(--text2);margin-bottom:6px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:12px 20px;font-size:13px;font-weight:500;color:var(--text);z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.btn-danger{background:#2d1515;color:var(--danger);border:1px solid #3d1a1a}
+.btn-danger:hover{background:#3d1515}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:11px 20px;font-size:13px;font-weight:500;color:var(--text);z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .toast.success{border-color:var(--success)}
 .toast.error{border-color:var(--danger)}
 .hidden{display:none!important}
-@media(max-width:420px){.lines-header,.line-item{grid-template-columns:1fr 55px 72px 72px 28px;gap:4px}.form-label{min-width:90px}}
+@media(max-width:900px){
+  :root{--sidebar:220px}
+  .dash-stats{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+  .sidebar-list{max-height:200px}
+  .editor,.dashboard{padding:16px}
+  .dash-stats{grid-template-columns:1fr 1fr}
+  .topbar-logo{min-width:auto;border-right:none}
+}
 </style>
 </head>
 <body>
-<div class="header">
-  <div class="header-inner">
-    <div class="logo">
-      <div class="logo-icon">SJ</div>
-      <span class="logo-text">Faktura</span>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <div class="logo-icon">SJ</div>
+    <span class="logo-text">Faktura</span>
+  </div>
+  <div class="topbar-greeting">
+    <div class="greeting-pill" id="greetingPill">Laster...</div>
+  </div>
+  <div class="topbar-nr" id="topbarNr"></div>
+</div>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <button class="btn-new" onclick="nyFaktura()">＋ Opprett ny faktura</button>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="searchInput" placeholder="Søk navn, årsak..." oninput="renderSidebar()">
+      </div>
     </div>
-    <span class="fakturanr-badge" id="headerNr">#1001</span>
+    <div class="filter-tabs">
+      <div class="filter-tab active" data-filter="alle" onclick="setFilter(this)">Alle</div>
+      <div class="filter-tab" data-filter="sendt" onclick="setFilter(this)">Sendt</div>
+      <div class="filter-tab" data-filter="kladd" onclick="setFilter(this)">Kladd</div>
+    </div>
+    <div class="sidebar-list" id="sidebarList"></div>
   </div>
-</div>
-<div class="greeting-bar">
-  <div class="greeting-inner">
-    <div class="greeting-time" id="gTime">God morgen</div>
-    <div class="greeting-name">Hei, <span>Steven</span> 👋</div>
-    <div class="greeting-sub" id="gDate"></div>
-  </div>
-</div>
-<div class="tabs">
-  <div class="tabs-inner">
-    <div class="tab active" onclick="switchTab('ny')" id="tab-ny">Ny faktura</div>
-    <div class="tab" onclick="switchTab('historikk')" id="tab-historikk">Historikk</div>
+
+  <!-- MAIN -->
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div id="viewDash" class="dashboard">
+      <div class="dash-title">Oversikt</div>
+      <div class="dash-stats" id="dashStats"></div>
+      <div class="table-wrap">
+        <div class="table-head">
+          <span class="table-head-title">Alle fakturaer</span>
+        </div>
+        <div id="dashTable"></div>
+      </div>
+    </div>
+
+    <!-- EDITOR -->
+    <div id="viewEditor" class="editor hidden">
+      <div class="editor-toprow">
+        <button class="btn-back" onclick="showDash()">← Tilbake</button>
+        <div class="editor-title" id="editorTitle">Ny faktura</div>
+        <select class="status-select" id="statusSelect" onchange="updateStatus()">
+          <option value="Opprettet">Opprettet</option>
+          <option value="Kladd">Kladd</option>
+          <option value="Ikke sendt">Ikke sendt</option>
+          <option value="Sendt">Sendt</option>
+        </select>
+      </div>
+
+      <div class="section-label">Fakturadetaljer</div>
+      <div class="card">
+        <div class="form-row"><span class="form-label">Faktura nr.</span><input type="text" id="fnr" oninput="document.getElementById('topbarNr').textContent='#'+this.value"></div>
+        <div class="form-row"><span class="form-label">Fakturadato</span><input type="date" id="fdato"></div>
+        <div class="form-row"><span class="form-label">Forfall</span><input type="date" id="fforfall"></div>
+      </div>
+
+      <div class="section-label">Årsak / Melding til kunde</div>
+      <div class="card">
+        <div class="reason-box">
+          <textarea id="arsak" rows="3" placeholder="F.eks: Arbeid utført på bad, uke 26. Inkluderer montering av fliser, tetting og avslutningsarbeid."></textarea>
+        </div>
+      </div>
+
+      <div class="section-label">Kunde</div>
+      <div class="card">
+        <div class="form-row"><span class="form-label">Navn</span><input type="text" id="kNavn" placeholder="Kundens navn" list="kSugg" oninput="autofillKunde()"><datalist id="kSugg"></datalist></div>
+        <div class="form-row"><span class="form-label">Adresse</span><input type="text" id="kAdr" placeholder="Gateadresse"></div>
+        <div class="form-row"><span class="form-label">Postnr / Sted</span><input type="text" id="kPost" placeholder="0000 Sted"></div>
+        <div class="form-row"><span class="form-label">E-post</span><input type="email" id="kEpost" placeholder="kunde@epost.no"></div>
+      </div>
+
+      <div class="section-label">Linjer</div>
+      <div class="lines-header">
+        <span>Beskrivelse</span><span>Antall</span><span>Pris/enhet</span><span style="text-align:right">Sum</span><span></span>
+      </div>
+      <div id="linjer"></div>
+      <button class="add-line-btn" onclick="addLinje()">＋ Legg til linje</button>
+
+      <div class="section-label">Innstillinger</div>
+      <div class="card">
+        <div class="toggle-row">
+          <div><div class="toggle-label">MVA (25%)</div><div class="toggle-sub">Legg til MVA på faktura</div></div>
+          <button class="toggle" id="mvaBtn" onclick="toggleMva()"></button>
+        </div>
+        <div class="form-row"><span class="form-label">Notat</span><textarea id="notat" rows="2" placeholder="Ekstra notat til kunden..."></textarea></div>
+      </div>
+
+      <div class="section-label">Totalt</div>
+      <div class="summary">
+        <div class="summary-row"><span class="summary-label">Subtotal</span><span class="summary-value" id="sub">0,00 kr</span></div>
+        <div class="summary-row hidden" id="mvaRow"><span class="summary-label">MVA (25%)</span><span class="summary-value" id="mvaVal">0,00 kr</span></div>
+        <div class="summary-row total"><span class="summary-label">Total å betale</span><span class="summary-value" id="tot">0,00 kr</span></div>
+      </div>
+
+      <div style="height:16px"></div>
+      <div class="action-row">
+        <button class="btn btn-secondary" onclick="lagreDraft()">💾 Lagre</button>
+        <button class="btn btn-primary" onclick="lagPDF()">📄 Lag PDF</button>
+      </div>
+      <div style="height:10px"></div>
+      <button class="btn btn-danger" onclick="slettFaktura()" id="btnSlett" style="display:none">🗑 Slett faktura</button>
+      <div style="height:32px"></div>
+    </div>
+
   </div>
 </div>
 
-<div class="main" id="view-ny">
-  <div class="section-label">Fakturadetaljer</div>
-  <div class="card">
-    <div class="form-row"><span class="form-label">Faktura nr.</span><input type="text" id="fnr" value="1001" oninput="document.getElementById('headerNr').textContent='#'+this.value"></div>
-    <div class="form-row"><span class="form-label">Fakturadato</span><input type="date" id="fdato"></div>
-    <div class="form-row"><span class="form-label">Forfall</span><input type="date" id="fforfall"></div>
-  </div>
-  <div class="section-label">Kunde</div>
-  <div class="card">
-    <div class="form-row"><span class="form-label">Navn</span><input type="text" id="kNavn" placeholder="Kundens navn" list="kSugg" oninput="autofillKunde()"><datalist id="kSugg"></datalist></div>
-    <div class="form-row"><span class="form-label">Adresse</span><input type="text" id="kAdr" placeholder="Gateadresse"></div>
-    <div class="form-row"><span class="form-label">Postnr / Sted</span><input type="text" id="kPost" placeholder="0000 Sted"></div>
-    <div class="form-row"><span class="form-label">E-post</span><input type="email" id="kEpost" placeholder="kunde@epost.no"></div>
-  </div>
-  <div class="section-label">Linjer</div>
-  <div class="lines-header">
-    <span>Beskrivelse</span><span>Antall</span><span>Pris/enhet</span><span style="text-align:right">Sum</span><span></span>
-  </div>
-  <div id="linjer"></div>
-  <button class="add-line-btn" onclick="addLinje()">＋ Legg til linje</button>
-  <div class="section-label">Innstillinger</div>
-  <div class="card">
-    <div class="toggle-row">
-      <div><div class="toggle-label">MVA (25%)</div><div class="toggle-sub">Legg til MVA på faktura</div></div>
-      <button class="toggle" id="mvaBtn" onclick="toggleMva()"></button>
-    </div>
-    <div class="form-row"><span class="form-label">Notat</span><textarea id="notat" rows="2" placeholder="Melding til kunden..."></textarea></div>
-  </div>
-  <div class="section-label">Totalt</div>
-  <div class="summary">
-    <div class="summary-row"><span class="summary-label">Subtotal</span><span class="summary-value" id="sub">0,00 kr</span></div>
-    <div class="summary-row hidden" id="mvaRow"><span class="summary-label">MVA (25%)</span><span class="summary-value" id="mvaVal">0,00 kr</span></div>
-    <div class="summary-row total"><span class="summary-label">Total å betale</span><span class="summary-value" id="tot">0,00 kr</span></div>
-  </div>
-  <div style="height:20px"></div>
-  <div class="btn-row">
-    <button class="btn btn-secondary" onclick="lagreDraft()">💾 Lagre kladd</button>
-    <button class="btn btn-primary" onclick="lagPDF()">📄 Lag PDF</button>
-  </div>
-</div>
-
-<div class="main hidden" id="view-historikk">
-  <div class="section-label">Fakturaer</div>
-  <div id="histContainer"></div>
-</div>
 <div class="toast" id="toast"></div>
 
 <script>
 const FIRMA={navn:"Steven M Jones Snekker Service",orgnr:"828 769 952",konto:"3260 11 62430",adresse:"Stavanger, Norge"};
-let linjer=[],mvaOn=false;
-let fakturaer=JSON.parse(localStorage.getItem('sj_fakturaer')||'[]');
-let kunder=JSON.parse(localStorage.getItem('sj_kunder')||'[]');
+let linjer=[],mvaOn=false,currentId=null,sidebarFilter='alle';
+let fakturaer=JSON.parse(localStorage.getItem('sj_f')||'[]');
+let kunder=JSON.parse(localStorage.getItem('sj_k')||'[]');
 
+// ── INIT ──
 window.addEventListener('DOMContentLoaded',()=>{
+  setGreeting();
+  buildKunderList();
+  renderSidebar();
+  renderDash();
+});
+
+function setGreeting(){
   const n=new Date(),h=n.getHours();
   const gr=h<5?'God natt':h<10?'God morgen':h<12?'God formiddag':h<17?'God ettermiddag':h<21?'God kveld':'God aften';
-  document.getElementById('gTime').textContent=gr;
   const days=['Søndag','Mandag','Tirsdag','Onsdag','Torsdag','Fredag','Lørdag'];
   const months=['januar','februar','mars','april','mai','juni','juli','august','september','oktober','november','desember'];
-  document.getElementById('gDate').textContent=`${days[n.getDay()]} ${n.getDate()}. ${months[n.getMonth()]} ${n.getFullYear()}`;
-  setDates();addLinje();addLinje();buildKunderList();
-  // Next invoice number
-  if(fakturaer.length){
-    const last=Math.max(...fakturaer.map(f=>parseInt(f.fnr)||0));
-    if(last>=1001){document.getElementById('fnr').value=last+1;document.getElementById('headerNr').textContent='#'+(last+1);}
-  }
-});
+  document.getElementById('greetingPill').innerHTML=`${gr}, <span>Steven</span> 👋 — ${days[n.getDay()]} ${n.getDate()}. ${months[n.getMonth()]}`;
+}
+
+// ── NAVIGATION ──
+function showDash(){
+  document.getElementById('viewDash').classList.remove('hidden');
+  document.getElementById('viewEditor').classList.add('hidden');
+  document.getElementById('topbarNr').textContent='';
+  renderDash();renderSidebar();
+}
+function showEditor(){
+  document.getElementById('viewDash').classList.add('hidden');
+  document.getElementById('viewEditor').classList.remove('hidden');
+}
+
+// ── NEW ──
+function nyFaktura(){
+  currentId=null;
+  linjer=[];mvaOn=false;
+  document.getElementById('mvaBtn').classList.remove('on');
+  document.getElementById('mvaRow').classList.add('hidden');
+  const next=nextNr();
+  document.getElementById('fnr').value=next;
+  document.getElementById('topbarNr').textContent='#'+next;
+  document.getElementById('editorTitle').textContent='Ny faktura';
+  document.getElementById('statusSelect').value='Opprettet';
+  document.getElementById('arsak').value='';
+  document.getElementById('notat').value='';
+  ['kNavn','kAdr','kPost','kEpost'].forEach(id=>document.getElementById(id).value='');
+  setDates();addLinje();addLinje();
+  document.getElementById('btnSlett').style.display='none';
+  showEditor();
+}
+
+function nextNr(){
+  if(!fakturaer.length)return'1001';
+  const max=Math.max(...fakturaer.map(f=>parseInt(f.fnr)||0));
+  return String(max+1);
+}
 
 function setDates(){
   const t=new Date(),ts=t.toISOString().split('T')[0];
@@ -196,21 +348,97 @@ function setDates(){
   document.getElementById('fforfall').value=f.toISOString().split('T')[0];
 }
 
-function switchTab(tab){
-  ['ny','historikk'].forEach(v=>{
-    document.getElementById('view-'+v).classList.toggle('hidden',v!==tab);
-    document.getElementById('tab-'+v).classList.toggle('active',v===tab);
-  });
-  if(tab==='historikk')renderHist();
+// ── LOAD EXISTING ──
+function loadFaktura(id){
+  const f=fakturaer.find(x=>x.id===id);if(!f)return;
+  currentId=id;
+  document.getElementById('fnr').value=f.fnr;
+  document.getElementById('topbarNr').textContent='#'+f.fnr;
+  document.getElementById('fdato').value=f.fdato;
+  document.getElementById('fforfall').value=f.fforfall;
+  document.getElementById('kNavn').value=f.kNavn||'';
+  document.getElementById('kAdr').value=f.kAdr||'';
+  document.getElementById('kPost').value=f.kPost||'';
+  document.getElementById('kEpost').value=f.kEpost||'';
+  document.getElementById('arsak').value=f.arsak||'';
+  document.getElementById('notat').value=f.notat||'';
+  document.getElementById('statusSelect').value=f.status||'Opprettet';
+  document.getElementById('editorTitle').textContent='Faktura #'+f.fnr;
+  linjer=f.linjer.map(l=>({...l}));
+  mvaOn=false;document.getElementById('mvaBtn').classList.remove('on');document.getElementById('mvaRow').classList.add('hidden');
+  if(f.mvaOn)toggleMva();
+  renderLinjer();
+  document.getElementById('btnSlett').style.display='block';
+  renderSidebar();
+  showEditor();
 }
 
-function addLinje(){
-  linjer.push({id:Date.now()+Math.random(),b:'',a:'',p:''});
-  renderLinjer();
+// ── FILTER ──
+function setFilter(el){
+  document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  sidebarFilter=el.dataset.filter;
+  renderSidebar();
 }
+
+// ── SIDEBAR ──
+function renderSidebar(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  let list=fakturaer.filter(f=>{
+    if(sidebarFilter==='sendt'&&f.status!=='Sendt')return false;
+    if(sidebarFilter==='kladd'&&f.status!=='Kladd')return false;
+    if(q&&!((f.kNavn||'').toLowerCase().includes(q))&&!((f.arsak||'').toLowerCase().includes(q))&&!String(f.fnr).includes(q))return false;
+    return true;
+  });
+  const c=document.getElementById('sidebarList');
+  if(!list.length){c.innerHTML=`<div class="sidebar-empty">Ingen fakturaer</div>`;return;}
+  c.innerHTML=list.map(f=>{
+    const tot=calcTotal(f);
+    return`<div class="sitem${currentId===f.id?' active':''}" onclick="loadFaktura(${f.id})">
+      <div class="sitem-top"><span class="sitem-name">${esc(f.kNavn||'Uten navn')}</span><span class="sitem-amt">${kr(tot)}</span></div>
+      <div class="sitem-bot"><span class="sitem-nr">#${esc(f.fnr)}</span><span class="sitem-date">${fmt(f.fdato)}</span>${badgeHtml(f.status)}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── DASHBOARD ──
+function renderDash(){
+  const total=fakturaer.reduce((s,f)=>s+calcTotal(f),0);
+  const sendt=fakturaer.filter(f=>f.status==='Sendt');
+  const usendt=fakturaer.filter(f=>f.status!=='Sendt');
+  const sendtSum=sendt.reduce((s,f)=>s+calcTotal(f),0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card"><div class="stat-label">Totalt fakturert</div><div class="stat-value">${kr(total)}</div><div class="stat-sub">${fakturaer.length} fakturaer</div></div>
+    <div class="stat-card"><div class="stat-label">Sendt</div><div class="stat-value">${kr(sendtSum)}</div><div class="stat-sub">${sendt.length} fakturaer</div></div>
+    <div class="stat-card"><div class="stat-label">Ikke sendt</div><div class="stat-value">${usendt.length}</div><div class="stat-sub">fakturaer</div></div>
+    <div class="stat-card"><div class="stat-label">Denne måneden</div><div class="stat-value">${kr(denneMnd())}</div><div class="stat-sub">fakturert</div></div>`;
+  if(!fakturaer.length){
+    document.getElementById('dashTable').innerHTML=`<div class="dash-empty"><div class="dash-empty-icon">📋</div><div class="dash-empty-title">Ingen fakturaer ennå</div><div style="font-size:12px">Klikk «Opprett ny faktura» for å starte</div></div>`;
+    return;
+  }
+  document.getElementById('dashTable').innerHTML=`<table class="ftable">
+    <thead><tr><th>Nr.</th><th>Kunde</th><th>Årsak</th><th>Dato</th><th>Forfall</th><th>Beløp</th><th>Status</th></tr></thead>
+    <tbody>${fakturaer.map(f=>`<tr onclick="loadFaktura(${f.id})">
+      <td>#${esc(f.fnr)}</td>
+      <td class="td-name">${esc(f.kNavn||'—')}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc((f.arsak||'—').substring(0,40))}${(f.arsak||'').length>40?'…':''}</td>
+      <td>${fmt(f.fdato)}</td>
+      <td>${fmt(f.fforfall)}</td>
+      <td class="td-amt">${kr(calcTotal(f))}</td>
+      <td>${badgeHtml(f.status)}</td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function denneMnd(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  return fakturaer.filter(f=>{const d=new Date(f.fdato);return d.getFullYear()===y&&d.getMonth()===m;}).reduce((s,f)=>s+calcTotal(f),0);
+}
+
+// ── LINJER ──
+function addLinje(){linjer.push({id:Date.now()+Math.random(),b:'',a:'',p:''});renderLinjer();}
 function removeLinje(id){linjer=linjer.filter(l=>l.id!==id);renderLinjer();}
 function updLinje(id,f,v){const l=linjer.find(l=>l.id===id);if(l)l[f]=v;calcTot();}
-
 function renderLinjer(){
   document.getElementById('linjer').innerHTML=linjer.map(l=>`
     <div class="line-item">
@@ -223,86 +451,60 @@ function renderLinjer(){
   calcTot();
 }
 
-function toggleMva(){
-  mvaOn=!mvaOn;
-  document.getElementById('mvaBtn').classList.toggle('on',mvaOn);
-  document.getElementById('mvaRow').classList.toggle('hidden',!mvaOn);
-  calcTot();
-}
+// ── MVA ──
+function toggleMva(){mvaOn=!mvaOn;document.getElementById('mvaBtn').classList.toggle('on',mvaOn);document.getElementById('mvaRow').classList.toggle('hidden',!mvaOn);calcTot();}
 
+// ── TOTALS ──
 function calcTot(){
   const s=linjer.reduce((t,l)=>t+parseFloat(l.a||0)*parseFloat(l.p||0),0);
   const m=mvaOn?s*.25:0;
   document.getElementById('sub').textContent=kr(s);
   document.getElementById('mvaVal').textContent=kr(m);
   document.getElementById('tot').textContent=kr(s+m);
-  document.querySelectorAll('.line-total').forEach((el,i)=>{
-    if(linjer[i])el.textContent=kr(parseFloat(linjer[i].a||0)*parseFloat(linjer[i].p||0));
-  });
+  document.querySelectorAll('.line-total').forEach((el,i)=>{if(linjer[i])el.textContent=kr(parseFloat(linjer[i].a||0)*parseFloat(linjer[i].p||0));});
 }
+function calcTotal(f){return f.linjer.reduce((s,l)=>s+parseFloat(l.a||0)*parseFloat(l.p||0),0)*(f.mvaOn?1.25:1);}
 
-function buildKunderList(){
-  document.getElementById('kSugg').innerHTML=kunder.map(k=>`<option value="${esc(k.navn)}">`).join('');
-}
-function autofillKunde(){
-  const v=document.getElementById('kNavn').value;
-  const k=kunder.find(c=>c.navn===v);
-  if(k){
-    document.getElementById('kAdr').value=k.adr||'';
-    document.getElementById('kPost').value=k.post||'';
-    document.getElementById('kEpost').value=k.epost||'';
-  }
-}
-function saveKunde(){
-  const navn=document.getElementById('kNavn').value.trim();
-  if(!navn)return;
-  const idx=kunder.findIndex(k=>k.navn===navn);
-  const k={navn,adr:document.getElementById('kAdr').value,post:document.getElementById('kPost').value,epost:document.getElementById('kEpost').value};
-  if(idx>=0)kunder[idx]=k;else kunder.push(k);
-  localStorage.setItem('sj_kunder',JSON.stringify(kunder));
-  buildKunderList();
-}
+// ── STATUS ──
+function updateStatus(){autoSave();}
 
+// ── KUNDER ──
+function buildKunderList(){document.getElementById('kSugg').innerHTML=kunder.map(k=>`<option value="${esc(k.navn)}">`).join('');}
+function autofillKunde(){const v=document.getElementById('kNavn').value;const k=kunder.find(c=>c.navn===v);if(k){document.getElementById('kAdr').value=k.adr||'';document.getElementById('kPost').value=k.post||'';document.getElementById('kEpost').value=k.epost||'';}}
+function saveKunde(){const navn=document.getElementById('kNavn').value.trim();if(!navn)return;const idx=kunder.findIndex(k=>k.navn===navn);const k={navn,adr:document.getElementById('kAdr').value,post:document.getElementById('kPost').value,epost:document.getElementById('kEpost').value};if(idx>=0)kunder[idx]=k;else kunder.push(k);localStorage.setItem('sj_k',JSON.stringify(kunder));buildKunderList();}
+
+// ── SAVE ──
 function collect(status){
-  return{id:Date.now(),fnr:document.getElementById('fnr').value,fdato:document.getElementById('fdato').value,fforfall:document.getElementById('fforfall').value,
-    kundeNavn:document.getElementById('kNavn').value,kAdr:document.getElementById('kAdr').value,kPost:document.getElementById('kPost').value,kEpost:document.getElementById('kEpost').value,
-    linjer:linjer.map(l=>({...l})),mvaOn,notat:document.getElementById('notat').value,status,ts:new Date().toISOString()};
+  return{id:currentId||Date.now(),fnr:document.getElementById('fnr').value,fdato:document.getElementById('fdato').value,fforfall:document.getElementById('fforfall').value,
+    kNavn:document.getElementById('kNavn').value,kAdr:document.getElementById('kAdr').value,kPost:document.getElementById('kPost').value,kEpost:document.getElementById('kEpost').value,
+    arsak:document.getElementById('arsak').value,notat:document.getElementById('notat').value,
+    linjer:linjer.map(l=>({...l})),mvaOn,status,ts:new Date().toISOString()};
 }
-function saveFaktura(f){
-  const i=fakturaer.findIndex(x=>x.fnr===f.fnr);
-  if(i>=0)fakturaer[i]=f;else fakturaer.unshift(f);
-  localStorage.setItem('sj_fakturaer',JSON.stringify(fakturaer));
-}
-function lagreDraft(){saveFaktura(collect('Kladd'));showToast('💾 Kladd lagret','success');}
+function saveFaktura(f){const i=fakturaer.findIndex(x=>x.id===f.id);if(i>=0)fakturaer[i]=f;else{fakturaer.unshift(f);currentId=f.id;}localStorage.setItem('sj_f',JSON.stringify(fakturaer));}
+function autoSave(){const s=document.getElementById('statusSelect').value;const f=collect(s);saveFaktura(f);renderSidebar();}
+function lagreDraft(){saveKunde();const s=document.getElementById('statusSelect').value;const f=collect(s);saveFaktura(f);renderSidebar();showToast('💾 Lagret','success');}
+function slettFaktura(){if(!currentId)return;if(!confirm('Slett denne fakturaen?'))return;fakturaer=fakturaer.filter(f=>f.id!==currentId);localStorage.setItem('sj_f',JSON.stringify(fakturaer));showDash();showToast('🗑 Slettet','success');}
 
+// ── PDF ──
 function lagPDF(){
   if(!document.getElementById('kNavn').value.trim()){showToast('⚠️ Fyll inn kundenavn','error');return;}
   if(!linjer.some(l=>l.b||l.p)){showToast('⚠️ Legg til minst én linje','error');return;}
   saveKunde();
-  const f=collect('Sendt');
-  saveFaktura(f);
+  document.getElementById('statusSelect').value='Sendt';
+  const f=collect('Sendt');saveFaktura(f);renderSidebar();
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297;
-  const db=[15,17,23],ab=[59,130,246],ac=[6,182,212],wh=[255,255,255],lg=[241,245,249],gr=[148,163,184],dg=[100,116,139];
-  // Header bg
+  const db=[15,17,23],ab=[59,130,246],ac=[6,182,212],wh=[255,255,255],gr=[148,163,184],dg=[100,116,139];
   doc.setFillColor(...db);doc.rect(0,0,W,45,'F');
   doc.setFillColor(...ab);doc.rect(0,0,W/2,1.5,'F');
   doc.setFillColor(...ac);doc.rect(W/2,0,W/2,1.5,'F');
-  // Firma
-  doc.setTextColor(...wh);doc.setFont('helvetica','bold');doc.setFontSize(16);
-  doc.text(FIRMA.navn,15,18);
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...gr);
-  doc.text('Org.nr: '+FIRMA.orgnr,15,25);doc.text(FIRMA.adresse,15,31);
-  // Faktura title
-  doc.setFont('helvetica','bold');doc.setFontSize(26);doc.setTextColor(...ab);
-  doc.text('FAKTURA',W-15,20,{align:'right'});
-  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...gr);
-  doc.text('Nr. '+f.fnr,W-15,28,{align:'right'});
-  // Body
-  doc.setFillColor(...wh);doc.rect(0,45,W,H-45,'F');
-  let y=58;
-  const c1=15,c2=73,c3=131;
+  doc.setTextColor(...wh);doc.setFont('helvetica','bold');doc.setFontSize(16);doc.text(FIRMA.navn,15,18);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...gr);doc.text('Org.nr: '+FIRMA.orgnr,15,25);doc.text(FIRMA.adresse,15,31);
+  doc.setFont('helvetica','bold');doc.setFontSize(26);doc.setTextColor(...ab);doc.text('FAKTURA',W-15,20,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...gr);doc.text('Nr. '+f.fnr,W-15,28,{align:'right'});
+  doc.setFillColor(255,255,255);doc.rect(0,45,W,H-45,'F');
+  let y=58;const c1=15,c2=73,c3=131;
   doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...dg);
   doc.text('FAKTURADATO',c1,y);doc.text('FORFALLSDATO',c2,y);doc.text('KONTONUMMER',c3,y);
   y+=5;doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(30,40,60);
@@ -311,12 +513,19 @@ function lagPDF(){
   y+=10;doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(...dg);
   doc.text('FAKTURERES TIL',c1,y);doc.text('FRA',c3,y);
   y+=5;doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(30,40,60);
-  doc.text(f.kundeNavn,c1,y);doc.text(FIRMA.navn,c3,y);
+  doc.text(f.kNavn,c1,y);doc.text(FIRMA.navn,c3,y);
   if(f.kAdr){y+=5;doc.text(f.kAdr,c1,y);}
   if(f.kPost){y+=5;doc.text(f.kPost,c1,y);}
   if(f.kEpost){y+=5;doc.setTextColor(...ab);doc.text(f.kEpost,c1,y);doc.setTextColor(30,40,60);}
-  // Table header
-  y+=16;doc.setFillColor(...db);doc.roundedRect(c1,y,W-c1*2,9,2,2,'F');
+  // Årsak
+  if(f.arsak){
+    y+=12;doc.setFillColor(245,248,255);doc.roundedRect(c1,y-4,W-c1*2,14,2,2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...dg);doc.text('GJELDER:',c1+4,y+2);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,40,60);
+    const lines=doc.splitTextToSize(f.arsak,W-c1*2-30);
+    doc.text(lines,c1+28,y+2);y+=Math.max(14,lines.length*5+6);
+  }
+  y+=6;doc.setFillColor(...db);doc.roundedRect(c1,y,W-c1*2,9,2,2,'F');
   doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...wh);
   doc.text('BESKRIVELSE',c1+4,y+5.5);doc.text('ANTALL',118,y+5.5,{align:'right'});
   doc.text('PRIS/ENH',148,y+5.5,{align:'right'});doc.text('BELØP',W-c1-2,y+5.5,{align:'right'});
@@ -327,71 +536,33 @@ function lagPDF(){
     doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,40,60);
     doc.text(l.b||'—',c1+4,y+3);doc.text(String(l.a||''),118,y+3,{align:'right'});
     doc.text(pdfKr(parseFloat(l.p||0)),148,y+3,{align:'right'});
-    doc.setFont('helvetica','bold');doc.text(pdfKr(bel),W-c1-2,y+3,{align:'right'});
-    y+=9;
+    doc.setFont('helvetica','bold');doc.text(pdfKr(bel),W-c1-2,y+3,{align:'right'});y+=9;
   });
   y+=6;doc.setDrawColor(42,47,61);doc.setLineWidth(.3);doc.line(c1,y,W-c1,y);y+=8;
   const mva=f.mvaOn?sub*.25:0,tot=sub+mva;
-  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...dg);
-  doc.text('Subtotal:',W-c1-52,y);doc.setFont('helvetica','bold');doc.setTextColor(30,40,60);
-  doc.text(pdfKr(sub),W-c1-2,y,{align:'right'});
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...dg);doc.text('Subtotal:',W-c1-52,y);doc.setFont('helvetica','bold');doc.setTextColor(30,40,60);doc.text(pdfKr(sub),W-c1-2,y,{align:'right'});
   if(f.mvaOn){y+=7;doc.setFont('helvetica','normal');doc.setTextColor(...dg);doc.text('MVA (25%):',W-c1-52,y);doc.setFont('helvetica','bold');doc.setTextColor(30,40,60);doc.text(pdfKr(mva),W-c1-2,y,{align:'right'});}
   y+=8;doc.setFillColor(...db);doc.roundedRect(W-c1-64,y-6,64,11,2,2,'F');
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...wh);
-  doc.text('TOTALT:',W-c1-52,y+2);doc.setTextColor(...ac);doc.text(pdfKr(tot),W-c1-2,y+2,{align:'right'});
-  if(f.notat){y+=20;doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...dg);doc.text('NOTAT:',c1,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,40,60);doc.text(f.notat,c1,y,{maxWidth:W-c1*2});}
-  // Footer
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...wh);doc.text('TOTALT:',W-c1-52,y+2);doc.setTextColor(...ac);doc.text(pdfKr(tot),W-c1-2,y+2,{align:'right'});
+  if(f.notat){y+=18;doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...dg);doc.text('NOTAT:',c1,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(30,40,60);doc.text(f.notat,c1,y,{maxWidth:W-c1*2});}
   doc.setFillColor(...db);doc.rect(0,H-18,W,18,'F');
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...gr);
   doc.text(FIRMA.navn+' · Org.nr: '+FIRMA.orgnr+' · Konto: '+FIRMA.konto,W/2,H-10,{align:'center'});
   doc.setTextColor(...dg);doc.text('Faktura #'+f.fnr+' · Forfall '+fmt(f.fforfall),W/2,H-5,{align:'center'});
-  doc.save('Faktura_'+f.fnr+'_'+f.kundeNavn.replace(/\s+/g,'-')+'.pdf');
+  doc.save('Faktura_'+f.fnr+'_'+(f.kNavn||'').replace(/\s+/g,'-')+'.pdf');
   showToast('✅ PDF klar!','success');
-  reset();
 }
 
-function reset(){
-  const next=parseInt(document.getElementById('fnr').value||'1000')+1;
-  document.getElementById('fnr').value=next;
-  document.getElementById('headerNr').textContent='#'+next;
-  ['kNavn','kAdr','kPost','kEpost','notat'].forEach(id=>document.getElementById(id).value='');
-  linjer=[];if(mvaOn)toggleMva();setDates();addLinje();addLinje();
+// ── HELPERS ──
+function badgeHtml(s){
+  const map={Sendt:'b-sendt',Kladd:'b-kladd','Ikke sendt':'b-ikke-sendt',Opprettet:'b-opprettet'};
+  return`<span class="badge ${map[s]||'b-opprettet'}">${s||'Opprettet'}</span>`;
 }
-
-function renderHist(){
-  const c=document.getElementById('histContainer');
-  if(!fakturaer.length){
-    c.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">Ingen fakturaer ennå</div><div class="empty-sub">Fakturaer vises her</div></div>';return;
-  }
-  c.innerHTML=fakturaer.map(f=>{
-    const tot=f.linjer.reduce((s,l)=>s+parseFloat(l.a||0)*parseFloat(l.p||0),0)*(f.mvaOn?1.25:1);
-    return`<div class="invoice-item" onclick="loadFaktura(${f.id})">
-      <div class="invoice-item-top"><div class="invoice-customer">${esc(f.kundeNavn||'Ukjent')}</div><div class="invoice-amount">${kr(tot)}</div></div>
-      <div class="invoice-meta"><span class="invoice-nr">#${esc(f.fnr)}</span><span class="invoice-date">${fmt(f.fdato)}</span><span class="badge ${f.status==='Sendt'?'badge-sent':'badge-draft'}">${f.status}</span></div>
-    </div>`;
-  }).join('');
-}
-
-function loadFaktura(id){
-  const f=fakturaer.find(x=>x.id===id);if(!f)return;
-  document.getElementById('fnr').value=f.fnr;document.getElementById('headerNr').textContent='#'+f.fnr;
-  document.getElementById('fdato').value=f.fdato;document.getElementById('fforfall').value=f.fforfall;
-  document.getElementById('kNavn').value=f.kundeNavn;document.getElementById('kAdr').value=f.kAdr||'';
-  document.getElementById('kPost').value=f.kPost||'';document.getElementById('kEpost').value=f.kEpost||'';
-  document.getElementById('notat').value=f.notat||'';
-  linjer=f.linjer.map(l=>({...l}));
-  if(f.mvaOn!==mvaOn)toggleMva();
-  renderLinjer();switchTab('ny');showToast('📂 Faktura lastet','success');
-}
-
 function kr(n){return n.toLocaleString('nb-NO',{minimumFractionDigits:2,maximumFractionDigits:2})+' kr';}
 function pdfKr(n){return n.toLocaleString('nb-NO',{minimumFractionDigits:2,maximumFractionDigits:2})+' kr';}
 function fmt(s){if(!s)return'';const[y,m,d]=s.split('-');return`${d}.${m}.${y}`;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function showToast(msg,type=''){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'')+' show';
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+(type||'')+' show';setTimeout(()=>t.classList.remove('show'),2800);}
 </script>
 </body>
 </html>
