@@ -283,6 +283,18 @@ select option{background:var(--surface2)}
   </div>
 </div>
 
+<!-- PDF PREVIEW MODAL -->
+<div id="pdfModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border)">
+    <div style="font-size:14px;font-weight:600">Forhåndsvisning</div>
+    <div style="display:flex;gap:10px">
+      <button onclick="lastNedPDF()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:500;color:var(--text);cursor:pointer">⬇ Last ned</button>
+      <button onclick="lukkPdfModal()" style="background:var(--danger);border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:500;color:#fff;cursor:pointer">✕ Lukk</button>
+    </div>
+  </div>
+  <iframe id="pdfFrame" style="flex:1;border:none;width:100%;background:#525659"></iframe>
+</div>
+
 <!-- SEND MODAL -->
 <div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:20px">
   <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;max-width:440px;width:100%">
@@ -575,16 +587,32 @@ function validerSkjema(){
   return true;
 }
 
+let currentPdfBlob = null;
+
 function visningsPDF(){
   if(!validerSkjema())return;
   saveKunde();
   const f=collect(document.getElementById('statusSelect').value);
   saveFaktura(f);renderSidebar();
   const doc=byggPDF(f);
-  const blob=doc.output('blob');
-  const url=URL.createObjectURL(blob);
-  window.open(url,'_blank');
-  showToast('📄 PDF åpnet i ny fane','success');
+  currentPdfBlob=doc.output('blob');
+  const url=URL.createObjectURL(currentPdfBlob);
+  document.getElementById('pdfFrame').src=url;
+  document.getElementById('pdfModal').style.display='flex';
+}
+
+function lukkPdfModal(){
+  document.getElementById('pdfModal').style.display='none';
+  document.getElementById('pdfFrame').src='';
+}
+
+function lastNedPDF(){
+  if(!currentPdfBlob)return;
+  const f=collect(document.getElementById('statusSelect').value);
+  const url=URL.createObjectURL(currentPdfBlob);
+  const a=document.createElement('a');
+  a.href=url;a.download='Faktura_'+f.fnr+'_'+(f.kNavn||'').replace(/\s+/g,'-')+'.pdf';
+  a.click();
 }
 
 function sendFaktura(){
