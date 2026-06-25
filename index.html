@@ -581,8 +581,10 @@ function visningsPDF(){
   const f=collect(document.getElementById('statusSelect').value);
   saveFaktura(f);renderSidebar();
   const doc=byggPDF(f);
-  doc.save('Faktura_'+f.fnr+'_'+(f.kNavn||'').replace(/\s+/g,'-')+'.pdf');
-  showToast('📄 PDF lastet ned','success');
+  const blob=doc.output('blob');
+  const url=URL.createObjectURL(blob);
+  window.open(url,'_blank');
+  showToast('📄 PDF åpnet i ny fane','success');
 }
 
 function sendFaktura(){
