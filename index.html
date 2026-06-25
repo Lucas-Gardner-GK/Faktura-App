@@ -270,13 +270,35 @@ select option{background:var(--surface2)}
       <div style="height:16px"></div>
       <div class="action-row">
         <button class="btn btn-secondary" onclick="lagreDraft()">💾 Lagre</button>
-        <button class="btn btn-primary" onclick="lagPDF()">📄 Lag PDF</button>
+        <button class="btn btn-secondary" onclick="visningsPDF()">👁 Se PDF</button>
       </div>
+      <div style="height:10px"></div>
+      <button class="btn btn-primary" onclick="sendFaktura()" id="btnSend" style="font-size:15px;padding:16px">📤 Send faktura</button>
       <div style="height:10px"></div>
       <button class="btn btn-danger" onclick="slettFaktura()" id="btnSlett" style="display:none">🗑 Slett faktura</button>
       <div style="height:32px"></div>
     </div>
 
+  </div>
+</div>
+
+<!-- SEND MODAL -->
+<div id="sendModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;max-width:440px;width:100%">
+    <div style="font-size:17px;font-weight:700;margin-bottom:6px">📤 Send faktura</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">PDF lastes ned og Mail åpnes med alt klart.</div>
+    <div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">E-post til kunde</div>
+      <input id="modalEpost" type="email" placeholder="kunde@epost.no" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;text-align:left">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px">Emne</div>
+      <input id="modalEmne" type="text" style="width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;font-family:inherit;outline:none;text-align:left">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="btn btn-secondary" onclick="lukkModal()">Avbryt</button>
+      <button class="btn btn-primary" onclick="bekreftSend()">📤 Send nå</button>
+    </div>
   </div>
 </div>
 
@@ -486,12 +508,7 @@ function lagreDraft(){saveKunde();const s=document.getElementById('statusSelect'
 function slettFaktura(){if(!currentId)return;if(!confirm('Slett denne fakturaen?'))return;fakturaer=fakturaer.filter(f=>f.id!==currentId);localStorage.setItem('sj_f',JSON.stringify(fakturaer));showDash();showToast('🗑 Slettet','success');}
 
 // ── PDF ──
-function lagPDF(){
-  if(!document.getElementById('kNavn').value.trim()){showToast('⚠️ Fyll inn kundenavn','error');return;}
-  if(!linjer.some(l=>l.b||l.p)){showToast('⚠️ Legg til minst én linje','error');return;}
-  saveKunde();
-  document.getElementById('statusSelect').value='Sendt';
-  const f=collect('Sendt');saveFaktura(f);renderSidebar();
+function byggPDF(f){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
   const W=210,H=297;
@@ -517,7 +534,6 @@ function lagPDF(){
   if(f.kAdr){y+=5;doc.text(f.kAdr,c1,y);}
   if(f.kPost){y+=5;doc.text(f.kPost,c1,y);}
   if(f.kEpost){y+=5;doc.setTextColor(...ab);doc.text(f.kEpost,c1,y);doc.setTextColor(30,40,60);}
-  // Årsak
   if(f.arsak){
     y+=12;doc.setFillColor(245,248,255);doc.roundedRect(c1,y-4,W-c1*2,14,2,2,'F');
     doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...dg);doc.text('GJELDER:',c1+4,y+2);
@@ -549,8 +565,61 @@ function lagPDF(){
   doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...gr);
   doc.text(FIRMA.navn+' · Org.nr: '+FIRMA.orgnr+' · Konto: '+FIRMA.konto,W/2,H-10,{align:'center'});
   doc.setTextColor(...dg);doc.text('Faktura #'+f.fnr+' · Forfall '+fmt(f.fforfall),W/2,H-5,{align:'center'});
+  return doc;
+}
+
+function validerSkjema(){
+  if(!document.getElementById('kNavn').value.trim()){showToast('⚠️ Fyll inn kundenavn','error');return false;}
+  if(!linjer.some(l=>l.b||l.p)){showToast('⚠️ Legg til minst én linje','error');return false;}
+  return true;
+}
+
+function visningsPDF(){
+  if(!validerSkjema())return;
+  saveKunde();
+  const f=collect(document.getElementById('statusSelect').value);
+  saveFaktura(f);renderSidebar();
+  const doc=byggPDF(f);
   doc.save('Faktura_'+f.fnr+'_'+(f.kNavn||'').replace(/\s+/g,'-')+'.pdf');
-  showToast('✅ PDF klar!','success');
+  showToast('📄 PDF lastet ned','success');
+}
+
+function sendFaktura(){
+  if(!validerSkjema())return;
+  saveKunde();
+  const f=collect(document.getElementById('statusSelect').value);
+  saveFaktura(f);renderSidebar();
+  // Pre-fyll modal
+  document.getElementById('modalEpost').value=f.kEpost||'';
+  document.getElementById('modalEmne').value='Faktura #'+f.fnr+' fra '+FIRMA.navn;
+  document.getElementById('sendModal').style.display='flex';
+}
+
+function lukkModal(){document.getElementById('sendModal').style.display='none';}
+
+function bekreftSend(){
+  const epost=document.getElementById('modalEpost').value.trim();
+  const emne=encodeURIComponent(document.getElementById('modalEmne').value);
+  // Last ned PDF
+  const f=collect('Sendt');
+  saveFaktura(f);renderSidebar();
+  document.getElementById('statusSelect').value='Sendt';
+  const doc=byggPDF(f);
+  const pdfNavn='Faktura_'+f.fnr+'_'+(f.kNavn||'').replace(/\s+/g,'-')+'.pdf';
+  doc.save(pdfNavn);
+  lukkModal();
+  // Åpne Mail
+  const body=encodeURIComponent(
+    'Hei '+f.kNavn+',\n\n'+
+    'Vedlagt finner du faktura #'+f.fnr+(f.arsak?' for: '+f.arsak:'')+'.\n\n'+
+    'Beløp: '+pdfKr(calcTotal(f))+'\n'+
+    'Forfall: '+fmt(f.fforfall)+'\n'+
+    'Kontonummer: '+FIRMA.konto+'\n\n'+
+    'PDF er lastet ned — legg ved filen «'+pdfNavn+'» manuelt.\n\n'+
+    'Med vennlig hilsen\n'+FIRMA.navn
+  );
+  window.location.href='mailto:'+epost+'?subject='+emne+'&body='+body;
+  showToast('✅ Mail åpnet — legg ved PDF!','success');
 }
 
 // ── HELPERS ──
