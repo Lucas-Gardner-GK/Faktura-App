@@ -479,7 +479,15 @@ function renderLinjer(){
     <div class="line-item">
       <input type="text" placeholder="Beskrivelse" value="${esc(l.b)}" onchange="updLinje(${l.id},'b',this.value)">
       <input type="number" placeholder="1" value="${l.a||''}" min="0" step="0.5" onchange="updLinje(${l.id},'a',this.value)">
-      <input type="text" placeholder="timer" value="${esc(l.e||'timer')}" onchange="updLinje(${l.id},'e',this.value)" style="text-align:center">
+      <select onchange="updLinje(${l.id},'e',this.value)" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 4px;font-size:12px;color:var(--text);width:100%">
+        <option value="timer" ${(l.e||'timer')==='timer'?'selected':''}>timer</option>
+        <option value="stk" ${l.e==='stk'?'selected':''}>stk</option>
+        <option value="m²" ${l.e==='m²'?'selected':''}>m²</option>
+        <option value="m" ${l.e==='m'?'selected':''}>m</option>
+        <option value="jobb" ${l.e==='jobb'?'selected':''}>jobb</option>
+        <option value="dag" ${l.e==='dag'?'selected':''}>dag</option>
+        <option value="ls" ${l.e==='ls'?'selected':''}>ls</option>
+      </select>
       <input type="number" placeholder="0" value="${l.p||''}" min="0" onchange="updLinje(${l.id},'p',this.value)">
       <div class="line-total">${kr(parseFloat(l.a||0)*parseFloat(l.p||0))}</div>
       <button class="line-delete" onclick="removeLinje(${l.id})">×</button>
