@@ -108,9 +108,9 @@ textarea{resize:none;text-align:left;line-height:1.5}
 select option{background:var(--surface2)}
 .reason-box{padding:12px 16px}
 .reason-box textarea{font-size:13px;color:var(--text);line-height:1.6;min-height:70px}
-.lines-header{display:grid;grid-template-columns:1fr 65px 85px 85px 30px;gap:6px;padding:9px 14px;background:var(--surface2);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none}
+.lines-header{display:grid;grid-template-columns:1fr 55px 70px 85px 85px 30px;gap:6px;padding:9px 14px;background:var(--surface2);border-radius:var(--radius) var(--radius) 0 0;border:1px solid var(--border);border-bottom:none}
 .lines-header span{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)}
-.line-item{display:grid;grid-template-columns:1fr 65px 85px 85px 30px;gap:6px;padding:9px 14px;border:1px solid var(--border);border-top:none;background:var(--surface);align-items:center}
+.line-item{display:grid;grid-template-columns:1fr 55px 70px 85px 85px 30px;gap:6px;padding:9px 14px;border:1px solid var(--border);border-top:none;background:var(--surface);align-items:center}
 .line-item:last-child{border-radius:0 0 var(--radius) var(--radius)}
 .line-item input{text-align:left;font-size:13px;padding:5px 8px;background:var(--bg);border:1px solid var(--border);border-radius:6px}
 .line-item input:focus{border-color:var(--accent);background:#1a2035}
@@ -247,7 +247,7 @@ select option{background:var(--surface2)}
 
       <div class="section-label">Linjer</div>
       <div class="lines-header">
-        <span>Beskrivelse</span><span>Antall</span><span>Pris/enhet</span><span style="text-align:right">Sum</span><span></span>
+        <span>Beskrivelse</span><span>Antall</span><span>Enhet</span><span>Pris/enhet</span><span style="text-align:right">Sum</span><span></span>
       </div>
       <div id="linjer"></div>
       <button class="add-line-btn" onclick="addLinje()">＋ Legg til linje</button>
@@ -471,7 +471,7 @@ function denneMnd(){
 }
 
 // ── LINJER ──
-function addLinje(){linjer.push({id:Date.now()+Math.random(),b:'',a:'',p:''});renderLinjer();}
+function addLinje(){linjer.push({id:Date.now()+Math.random(),b:'',a:'',e:'timer',p:''});renderLinjer();}
 function removeLinje(id){linjer=linjer.filter(l=>l.id!==id);renderLinjer();}
 function updLinje(id,f,v){const l=linjer.find(l=>l.id===id);if(l)l[f]=v;calcTot();}
 function renderLinjer(){
@@ -479,6 +479,7 @@ function renderLinjer(){
     <div class="line-item">
       <input type="text" placeholder="Beskrivelse" value="${esc(l.b)}" onchange="updLinje(${l.id},'b',this.value)">
       <input type="number" placeholder="1" value="${l.a||''}" min="0" step="0.5" onchange="updLinje(${l.id},'a',this.value)">
+      <input type="text" placeholder="timer" value="${esc(l.e||'timer')}" onchange="updLinje(${l.id},'e',this.value)" style="text-align:center">
       <input type="number" placeholder="0" value="${l.p||''}" min="0" onchange="updLinje(${l.id},'p',this.value)">
       <div class="line-total">${kr(parseFloat(l.a||0)*parseFloat(l.p||0))}</div>
       <button class="line-delete" onclick="removeLinje(${l.id})">×</button>
@@ -645,7 +646,7 @@ function bekreftSend(){
   const total=subtotal+mva;
 
   const linjerTekst=f.linjer.filter(l=>l.b||l.p).map(l=>
-    `${l.b||'—'}   x${l.a||0}   ${pdfKr(parseFloat(l.p||0))}   = ${pdfKr(parseFloat(l.a||0)*parseFloat(l.p||0))}`
+    `${l.b||'—'}   ${l.a||0} ${l.e||'timer'}   ${pdfKr(parseFloat(l.p||0))}/${l.e||'timer'}   = ${pdfKr(parseFloat(l.a||0)*parseFloat(l.p||0))}`
   ).join('\n');
 
   emailjs.send('service_of6o4ht','template_mgjy2m1',{
